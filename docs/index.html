@@ -247,7 +247,7 @@
     <div class="container">
         <div class="header">
             <h1 class="title">HappyBDay-kernel</h1>
-            <p class="subtitle">A custom assembly kernel(NOTE, THIS IS NOT A REAL REPRESENTATION OF HOW THIS ACCTUALLY LOOKS. It's a demo)</p>
+            <p class="subtitle">A custom assembly kernel(NOTE, THIS IS NOT A REAL REPRESENTATION OF HOW THIS ACTUALLY LOOKS. It's a demo. go to the repo too see what this really looks like.)</p>
         </div>
 
         <div class="emulator-container">
@@ -495,32 +495,9 @@
         }
 
         function downloadOS() {
-            // Create a simulated download
             const link = document.createElement('a');
             link.href = 'data:text/plain;charset=utf-8,' + encodeURIComponent(`
-# HappyBDay-kernel - Assembly Source Code
-
-This is a demonstration of the HappyBDay-kernel source files.
-In a real implementation, you would download:
-
-1. boot/boot.asm - The bootloader
-2. kernel/kernel.asm - The kernel with birthday animation
-3. Makefile - Build system
-4. birthday.img - Bootable disk image
-
-To build and run:
-make clean
-make run
-
-The OS features:
-- Custom x86 assembly bootloader
-- Real-mode kernel
-- Text-mode confetti animation
-- PC speaker music
-- Fade-in effects
-- Direct hardware control
-
-Total size: Less than 1KB!
+https://github.com/CPScript/HappyBDay-Kernel
             `);
             link.download = 'birthday-os-info.txt';
             link.click();
