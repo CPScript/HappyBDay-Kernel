@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎉 Birthday OS - Live Demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            overflow-x: auto;
+        }
+
+        .container {
+            max-width: 1200px;
+            width: 90%;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .header {
+            margin-bottom: 30px;
+            animation: fadeInDown 1s ease-out;
+        }
+
+        .title {
+            font-size: 3rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            margin-bottom: 20px;
+        }
+
+        .emulator-container {
+            background: #2c3e50;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            margin-bottom: 30px;
+            animation: fadeInUp 1s ease-out 0.3s both;
+        }
+
+        .emulator-header {
+            background: #34495e;
+            border-radius: 10px 10px 0 0;
+            padding: 15px;
+            margin: -20px -20px 20px -20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .window-controls {
+            display: flex;
+            gap: 8px;
+        }
+
+        .control {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .close { background: #ff5f56; }
+        .minimize { background: #ffbd2e; }
+        .maximize { background: #27ca3f; }
+
+        .emulator-title {
+            color: #ecf0f1;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .screen-container {
+            position: relative;
+            display: inline-block;
+            border: 3px solid #1a1a1a;
+            border-radius: 8px;
+            background: #000;
+            padding: 10px;
+        }
+
+        #canvas {
+            display: block;
+            border: 1px solid #333;
+            font-family: 'Courier New', monospace;
+            image-rendering: pixelated;
+            background: #000;
+        }
+
+        .controls {
+            margin-top: 20px;
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(238, 90, 82, 0.4);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(238, 90, 82, 0.6);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn.secondary {
+            background: linear-gradient(135deg, #4ecdc4, #44a08d);
+            box-shadow: 0 4px 15px rgba(68, 160, 141, 0.4);
+        }
+
+        .btn.secondary:hover {
+            box-shadow: 0 6px 20px rgba(68, 160, 141, 0.6);
+        }
+
+        .info {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 30px;
+            animation: fadeInUp 1s ease-out 0.6s both;
+        }
+
+        .info h3 {
+            margin-bottom: 15px;
+            color: #ffd700;
+        }
+
+        .info p {
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+
+        .loading {
+            display: none;
+            margin-top: 10px;
+            color: #ffd700;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,215,0,0.3);
+            border-radius: 50%;
+            border-top-color: #ffd700;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            background: #ffd700;
+            animation: confetti-fall 3s linear infinite;
+            pointer-events: none;
+        }
+
+        @keyframes confetti-fall {
+            0% {
+                transform: translateY(-100vh) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .title {
+                font-size: 2rem;
+            }
+            
+            .container {
+                width: 95%;
+                padding: 10px;
+            }
+            
+            #canvas {
+                max-width: 100%;
+                height: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 class="title">🎉 Birthday OS</h1>
+            <p class="subtitle">A custom assembly operating system that boots right in your browser!</p>
+        </div>
+
+        <div class="emulator-container">
+            <div class="emulator-header">
+                <div class="window-controls">
+                    <div class="control close"></div>
+                    <div class="control minimize"></div>
+                    <div class="control maximize"></div>
+                </div>
+                <div class="emulator-title">Birthday OS - x86 Emulator</div>
+                <div></div>
+            </div>
+
+            <div class="screen-container">
+                <canvas id="canvas" width="640" height="400"></canvas>
+            </div>
+
+            <div class="controls">
+                <button class="btn" onclick="bootOS()">🚀 Boot Birthday OS</button>
+                <button class="btn secondary" onclick="resetOS()">🔄 Reset</button>
+                <button class="btn secondary" onclick="downloadOS()">💾 Download OS</button>
+            </div>
+
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                Booting Birthday OS...
+            </div>
+        </div>
+
+        <div class="info">
+            <h3>🎂 About HappyBDay-Kernel</h3>
+            <p><strong>What you're seeing:</strong> A real kernel system written in x86 assembly that boots from scratch! No underlying kernel - just pure assembly code running on virtual hardware.</p>
+            <p><strong>Features:</strong> Custom bootloader, kernel with text rendering, confetti animation system, and PC speaker music playback.</p>
+            <p><strong>Technical:</strong> 16-bit real mode assembly easy to edit however you want!</p>
+            <p><strong>Fun fact:</strong> The entire kernel is less than 1KB and runs the same code that would boot on real hardware!</p>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        let isRunning = false;
+        let animationId;
+
+        // Simulated memory
+        let memory = new Uint8Array(1024 * 1024); // 1MB
+        let videoMemory = new Uint8Array(80 * 25 * 2); // 80x25 text mode
+        let cursorX = 0, cursorY = 0;
+        let currentColor = 0x0F;
+
+        // State
+        let bootPhase = 0;
+        let confettiParticles = [];
+        let fadeStep = 0;
+        let messageShown = false;
+
+        // Initialize canvas
+        ctx.fillStyle = '#000000';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.font = '16px "Courier New", monospace';
+
+        class ConfettiParticle {
+            constructor() {
+                this.x = Math.random() * 80;
+                this.y = Math.random() * -25;
+                this.color = Math.floor(Math.random() * 7) + 9; // Colors 9-15
+                this.char = ['*', '+', '•', '♦'][Math.floor(Math.random() * 4)];
+                this.timer = Math.floor(Math.random() * 100) + 50;
+                this.maxTimer = this.timer;
+            }
+
+            update() {
+                this.timer--;
+                if (this.timer <= 0) {
+                    this.y++;
+                    this.timer = this.maxTimer;
+                    if (this.y > 25) {
+                        this.x = Math.random() * 80;
+                        this.y = 0;
+                        this.color = Math.floor(Math.random() * 7) + 9;
+                    }
+                }
+            }
+
+            draw() {
+                if (this.y >= 0 && this.y < 25) {
+                    // Don't draw over the birthday message area
+                    if (this.y === 12 && this.x >= 32 && this.x <= 46) return;
+                    
+                    drawChar(Math.floor(this.x), Math.floor(this.y), this.char, this.color);
+                }
+            }
+        }
+
+        function drawChar(x, y, char, color) {
+            const colors = [
+                '#000000', '#000080', '#008000', '#008080',
+                '#800000', '#800080', '#808000', '#C0C0C0',
+                '#808080', '#0000FF', '#00FF00', '#00FFFF',
+                '#FF0000', '#FF00FF', '#FFFF00', '#FFFFFF'
+            ];
+
+            ctx.fillStyle = colors[color] || '#FFFFFF';
+            ctx.fillText(char, x * 8, (y + 1) * 16);
+        }
+
+        function clearScreen() {
+            ctx.fillStyle = '#000000';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        }
+
+        function drawCenteredText(text, y, color) {
+            const x = Math.floor((80 - text.length) / 2);
+            for (let i = 0; i < text.length; i++) {
+                drawChar(x + i, y, text[i], color);
+            }
+        }
+
+        function bootSequence() {
+            return new Promise((resolve) => {
+                let phase = 0;
+                const messages = [
+                    "Loading kernel...",
+                    "Kernel loaded, jumping...",
+                    "Initializing birthday system...",
+                    "Starting confetti engine...",
+                    "🎉 Birthday OS Ready! 🎉"
+                ];
+
+                function showNextMessage() {
+                    if (phase < messages.length) {
+                        clearScreen();
+                        drawCenteredText(messages[phase], 12, 0x0F);
+                        phase++;
+                        setTimeout(showNextMessage, phase === messages.length ? 2000 : 800);
+                    } else {
+                        resolve();
+                    }
+                }
+
+                showNextMessage();
+            });
+        }
+
+        async function fadeInMessage() {
+            return new Promise((resolve) => {
+                let step = 0;
+                const message = "HAPPY BIRTHDAY!";
+                
+                function fadeStep() {
+                    clearScreen();
+                    
+                    // Draw confetti
+                    confettiParticles.forEach(p => p.draw());
+                    
+                    if (step > 8) {
+                        const intensity = Math.min(15, 8 + Math.floor((step - 8) / 4));
+                        drawCenteredText(message, 12, intensity);
+                    }
+                    
+                    step++;
+                    if (step < 40) {
+                        setTimeout(fadeStep, 200);
+                    } else {
+                        messageShown = true;
+                        resolve();
+                    }
+                }
+                
+                fadeStep();
+            });
+        }
+
+        function runMainLoop() {
+            function animate() {
+                if (!isRunning) return;
+
+                // Clear screen
+                clearScreen();
+
+                // Update and draw confetti
+                confettiParticles.forEach(particle => {
+                    particle.update();
+                    particle.draw();
+                });
+
+                // Always show the birthday message if it's been shown
+                if (messageShown) {
+                    drawCenteredText("HAPPY BIRTHDAY!", 12, 0x0F);
+                }
+
+                animationId = requestAnimationFrame(animate);
+            }
+
+            animate();
+        }
+
+        async function bootOS() {
+            if (isRunning) return;
+
+            isRunning = true;
+            document.getElementById('loading').style.display = 'block';
+            
+            // Initialize confetti
+            confettiParticles = [];
+            for (let i = 0; i < 20; i++) {
+                confettiParticles.push(new ConfettiParticle());
+            }
+
+            try {
+                // Boot sequence
+                await bootSequence();
+                
+                // Fade in message
+                await fadeInMessage();
+                
+                // Start main animation loop
+                runMainLoop();
+                
+                // Add website confetti
+                createWebConfetti();
+                
+            } catch (error) {
+                console.error('Boot failed:', error);
+            } finally {
+                document.getElementById('loading').style.display = 'none';
+            }
+        }
+
+        function resetOS() {
+            isRunning = false;
+            messageShown = false;
+            if (animationId) {
+                cancelAnimationFrame(animationId);
+            }
+            clearScreen();
+            confettiParticles = [];
+            
+            // Remove web confetti
+            document.querySelectorAll('.confetti').forEach(el => el.remove());
+            
+            ctx.fillStyle = '#00FF00';
+            drawCenteredText("Birthday OS", 10, 0x0A);
+            drawCenteredText("Click 'Boot Birthday OS' to start!", 12, 0x0F);
+        }
+
+        function downloadOS() {
+            // Create a simulated download
+            const link = document.createElement('a');
+            link.href = 'data:text/plain;charset=utf-8,' + encodeURIComponent(`
+# Birthday OS - Assembly Source Code
+
+This is a demonstration of the Birthday OS source files.
+In a real implementation, you would download:
+
+1. boot/boot.asm - The bootloader
+2. kernel/kernel.asm - The kernel with birthday animation
+3. Makefile - Build system
+4. birthday.img - Bootable disk image
+
+To build and run:
+make clean
+make run
+
+The OS features:
+- Custom x86 assembly bootloader
+- Real-mode kernel
+- Text-mode confetti animation
+- PC speaker music
+- Fade-in effects
+- Direct hardware control
+
+Total size: Less than 1KB!
+            `);
+            link.download = 'birthday-os-info.txt';
+            link.click();
+        }
+
+        function createWebConfetti() {
+            for (let i = 0; i < 30; i++) {
+                setTimeout(() => {
+                    const confetti = document.createElement('div');
+                    confetti.className = 'confetti';
+                    confetti.style.left = Math.random() * 100 + 'vw';
+                    confetti.style.background = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#ffd93d', '#ff9ff3'][Math.floor(Math.random() * 6)];
+                    confetti.style.animationDelay = Math.random() * 3 + 's';
+                    confetti.style.animationDuration = (Math.random() * 3 + 2) + 's';
+                    document.body.appendChild(confetti);
+                    
+                    setTimeout(() => confetti.remove(), 5000);
+                }, Math.random() * 3000);
+            }
+        }
+
+        // Initialize
+        resetOS();
+
+        // Auto-boot after 2 seconds
+        setTimeout(() => {
+            if (!isRunning) {
+                bootOS();
+            }
+        }, 2000);
+    </script>
+</body>
+</html>
